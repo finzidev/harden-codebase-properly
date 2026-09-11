@@ -5,13 +5,13 @@ Principle: **slowness is almost always a shape problem, not a speed problem** â€
 ## Target state
 
 - [ ] No hot path loads a full table to filter it in memory; every occurrence of the `.all()` equivalent is justified.
-- [ ] Database-side pagination with an **exact** count, never estimated: a number must match wherever it appears.
+- [ ] Database-side pagination with an **exact** count wherever a number is shown to a user or gates an action; an estimate only where nobody reads it as truth `[PostgREST v12 count]`.
 - [ ] Counts and aggregations run in the database (`count(*) group by`, a dedicated function), never in memory after pulling down the join.
 - [ ] One read per thing being viewed: tabbed pages split into routes with their own reads.
 - [ ] Independent reads run in parallel; one `<Suspense>` per slow piece; a skeleton per route.
-- [ ] Cache only the **stable periphery**, with a short TTL **and** tag invalidation co-located with the write inside the service (never in the action).
+- [ ] Cache only the **stable periphery**, with a short TTL **and** tag invalidation `[RFC 9111 Â§ 4.4]` co-located with the write inside the service (never in the action); the invalidation call must work from every path that reaches the service (in Next.js 16, `revalidateTag(tag, { expire: 0 })`, not `updateTag`, which throws outside a Server Action `[Next.js 16.3.4]`).
 - [ ] An explicit list of what **never enters cache**: consents and deletions, locks and revocations, counts that precede an irreversible action, data-layer health status, the number on the "apply to all N" button.
-- [ ] Search and sort normalized on a **generated, indexed column**, never on a runtime expression; empty strings become real `NULL`s.
+- [ ] Search and sort normalized on a **generated, indexed column**, never on a runtime expression built in application code (Postgres indexes expressions; the client cannot be trusted to emit the matching one `[PostgreSQL Â§ 11.7]`); empty strings become real `NULL`s.
 - [ ] Every cap declares `truncated`, and the screen says so.
 - [ ] A round of paginated requests sits **above** the timeout guard (a per-request window, a batched parallel round, the first page alone as a probe).
 - [ ] Every volume number carries the date it was measured.
@@ -26,7 +26,7 @@ Principle: **slowness is almost always a shape problem, not a speed problem** â€
 5. **Cache**: does one exist? with tags? who invalidates it, and where (service or action)? does it hold anything used to decide something?
 6. **Timeout**: is there a request loop running inside a guard meant for a single request? At what data volume does it always fail?
 7. **Hot columns with no index**; searches using `unaccent(`, `lower(`, `nullif(` inside `.order(` or `.eq(` in application code.
-8. **Caps**: `grep -rnE "limit: [0-9]{3,}"` in bulk actions; does every occurrence declare truncation?
+8. **Caps**: `grep -rnE "\.limit\(|limit:\s*[0-9]{3,}" <src>` in bulk actions; does every occurrence declare truncation?
 
 Measurement method: no external profiler is needed. Isolate the function, count calls by reading the adapter, run the query in both forms for five rounds and take the median, compare the dev sample against real data, verify with the real client against the real database (a defect can exist only on the real branch). After the change: same path cold and warm, time and round-trips, and **identical on-screen numbers** before and after.
 
@@ -34,10 +34,10 @@ Measurement method: no external profiler is needed. Isolate the function, count 
 
 The path is the briefs: `briefs/phase-3-performance.md` R3.1â€“R3.8. Diagnosis measures: D3.
 
-## Rules with mechanical verification
+## Rules with mechanical verification (specified here; `sql/` ships the queries, the brief builds the rest)
 
 - Never `.all()` plus an in-memory filter on a hot path: grep for it, every occurrence justified.
-- Every cache invalidates next to the write inside the service: cross-check declared tags against invalidations in the same file; a two-path test.
+- Every cache invalidates next to the write inside the service: cross-check declared tags against invalidations in the same file; a two-path test; check the call, not only its location: a Server-Action-only API in a shared service is a latent throw on the webhook path.
 - Never an empty `catch {}` around an invalidation: swallow exactly one recognized condition ("outside a request"), rethrow everything else.
 - Normalizations run on a generated column: grep for SQL functions inside `.order(` / `.eq(` returns empty.
 - Every fixed bulk `limit` declares `truncated`.

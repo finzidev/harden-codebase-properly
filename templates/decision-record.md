@@ -4,11 +4,11 @@ It answers exactly one question: **why did we do it this way?** It is not a list
 
 ## Folder structure
 
-`docs/decisions/README.md` (how to read it, the statuses, the table of open questions) plus one file per decision: `NNN-descriptive-title.md`. These are defaults: if the host project already has a docs language and folder convention, use it (the stack map records it). Decision records themselves are written in the host project's language; this template is in English.
+`docs/decisions/README.md` (how to read it, the statuses, the table of open questions) plus one file per decision: `NNN-descriptive-title.md`.
 
-**Numbering.** The first free number, found by **listing the whole folder** (`ls docs/decisions/[0-9]*.md | sort`), never `ls | tail -1`: two parallel sessions produce two records with the same number.
+**Numbering.** The first free number, found by **listing the whole folder** (`ls docs/decisions/[0-9]*.md 2>/dev/null`), never `ls | tail -1`: two parallel sessions produce two records with the same number.
 
-## The six parts of a record
+## The parts of a record: the title line, `When`, `Status`, and five sections
 
 ```markdown
 # NNN. <Descriptive title: one sentence stating the choice, not the topic>

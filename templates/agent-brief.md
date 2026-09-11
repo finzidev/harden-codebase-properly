@@ -4,8 +4,6 @@ Rules: one agent = one area; self-contained task; explicit `model` (`sonnet` for
 
 Two variants: **read-only** (measurement, inventory, audit) and **repair**. Never mix them in the same agent.
 
-Write every report and every proposed decision record in the host project's language (recorded in the stack map); this template itself is in English.
-
 ---
 
 ## Variant A: read-only
@@ -20,8 +18,8 @@ SOURCES TO READ (all of them, not a sample):
 2. ...
 N. <exact measurement command, e.g. grep/jscpd/wc> (<what it produces>)
 
-WHAT TO EXTRACT, in this exact format (Markdown, max <N> words):
-# <Area>
+WHAT TO EXTRACT, in this exact format (Markdown, max <words> words):
+# <area>
 ## Measures (table: measure | value | date | command that reproduces it)
 ## Defects found while reading (one per line: file:line, symptom, why it is a defect, DO NOT repair)
 ## Proposals (one per line, with estimated cost and risk; they remain proposals)
@@ -37,11 +35,11 @@ WRITE the report to <scratch>/<area>.md and reply here with ONLY 5 lines: file w
 ## Variant B: repair
 
 ```
-Repo: <path> (<stack in one line>). Work ONLY in: <list of files>. Do not touch anything else.
+Repo: <path> (<stack in one line>). Work ONLY in: <files> (from <allocation>). Do not touch anything else.
 
 CONTEXT ALREADY VERIFIED (do not re-derive):
 - <diagnosis: root cause, in 2-4 lines>
-- <binding decision record: docs/decisions/NNN, in one line>
+- <record>: the binding decision record, one line
 - <starting number: e.g. "12 reads to open page X, measured on DD/MM">
 
 GOAL: <one sentence verifiable in the code>.

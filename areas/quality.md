@@ -4,7 +4,7 @@ Principle: **do not trust an anti-regression rig until it has proven it can turn
 
 ## Target state
 
-- [ ] One single verification script: typecheck && lint at zero **Error** && unit && **real production build**. Read the outcome from the exit code or a file, never from a pipe.
+- [ ] One single verification script: typecheck && lint at zero **Error** `[Sadowski et al., CACM 2018]` && unit && **real production build**. Read the outcome from the exit code or a file, never from a pipe.
 - [ ] Every unit test declares which world it runs against (`// tested against: fake | real adapter | both | none`); a mechanical check enforces it; the exemption list keeps shrinking.
 - [ ] There is a way to test the **real** adapter without the network (by intercepting the transport), because the fake and the real one diverge.
 - [ ] Custom static rules on domain invariants (a guard on every public action, no personal data in logs, no service key outside the data layer, no server directive inside the data layer), **each with its own fixtures** (`ruleid:` / `ok:`), run offline.
@@ -14,23 +14,25 @@ Principle: **do not trust an anti-regression rig until it has proven it can turn
 - [ ] An **acceptance checklist generated from the code surface** (pages, routes, actions), with automated checks: two-way coverage, entries describing gestures that no longer exist, phrases from a round found again in the register.
 - [ ] A **dirty fixture corpus**, built on purpose, with a manifest declaring how many defects to expect per category.
 - [ ] Every channel (email, alerts, backup, dead-letter, sync) **seen arriving** live at least once, with a date.
-- [ ] Every safeguard has a test that actually **invokes** it (not a disabled button) and produces a readable rejection.
+- [ ] Every safeguard has a test that actually **invokes** it (not a disabled button) and produces a readable rejection `[Yuan et al., OSDI 2014]`.
 - [ ] Every "guaranteed by" reference points to an existing test file, verified mechanically.
 
 ## The gate chain
 
 | Gate | Sees | Does NOT see |
 |---|---|---|
-| typecheck | type errors | style; runtime behavior; non-serializable values crossing the server to client boundary |
-| lint at zero Error | rules that would block the build on deploy | whatever the type checker already sees |
+| typecheck | type errors | style; runtime behavior; most non-serializable values crossing the server → client boundary (the Next.js TS plugin flags function props not named `action`/`*Action`) |
+| lint at zero Error | rules the type checker cannot see; on Next.js ≤ 15 these also break `next build`, on 16+ lint is its own step in the verify script `[Next.js 16 upgrade guide]` | whatever the type checker already sees |
 | unit | isolated pure logic | the fake/real difference, if it only runs against the fake |
-| real build | **the only gate that prerenders**: server to client serialization; interactions the dev server reports differently | business logic |
+| real build | **the only gate that prerenders every route without visiting it**: server to client serialization; interactions the dev server reports differently | business logic |
 | custom static analysis with fixtures | the project's syntactic patterns | logic; must run offline |
 | property-based models with a canary | sequences no one would write by hand | the real branch, if it only runs against the fake |
 | e2e with warm-up | real flows across multiple browsers | whether a test has gone stale |
 | manual acceptance testing from a generated checklist | what no machine can see: email that arrived, a backup that restored | "all green" only means "everything that could be checked from a screen" |
 | mutation testing | how much the tests are **worth** | switched off if the machine cannot sustain it |
 | adversarial bug-hunt rounds with mandatory reproduction | whatever survives the deterministic filters | nothing ships without an executed artifact |
+
+Two rows are framework-specific (real build, e2e warm-up). On a stack with no build the chain loses a row; the stack map's *absent here; replaced by* column names what stands in, or the plan says the step is dropped.
 
 ## What to measure
 
@@ -45,15 +47,15 @@ Principle: **do not trust an anti-regression rig until it has proven it can turn
 
 ## Repairs
 
-The path is the briefs: `briefs/phase-1-gates.md` R1.1, R1.2–R1.4 (verify script, static rules with fixtures, stale e2e, tested-against); `briefs/phase-5-tests.md` R5.1–R5.7 (canary, warm-up, generated checklist, dirty corpus, presumed protections, bug hunt, live channels). Diagnosis measures: D1.
+The path is the briefs: `briefs/phase-1-gates.md` R1.1, R1.2–R1.4 (verify script, static rules with fixtures, stale e2e, tested-against); `briefs/phase-5-tests.md` R5.1–R5.8 (canary, warm-up, generated checklist, dirty corpus, presumed protections, bug hunt, live channels, flow tests). Diagnosis measures: D1.
 
-## Rules with mechanical verification
+## Rules with mechanical verification (specified here; `sql/` ships the queries, the brief builds the rest)
 
 - Every test declares its world: enforced by a check in the unit suite.
-- Every rig knows how to turn red: `CANARY=<n>` comes out red for every `n`.
+- Every rig knows how to turn red: `CANARY=<n>` comes out red for every `n` `[Just et al., FSE 2014]`.
 - Every static rule carries its own fixtures: `semgrep --test` (or equivalent).
-- Releasable only with the verification script green start to finish, outcome read from `$?` or a file.
-- A/B comparisons and counter-tests on **one file**: `git show HEAD:<file>` into a temp file, swap it in, run the targeted test, restore, `cmp`. Never `git stash` on a tree shared with another session.
+- Releasable only with the verification script green start to finish, outcome read from `$?` (POSIX) or `$LASTEXITCODE` (PowerShell), immediately, or from a file.
+- A/B comparisons, counter-tests and canaries on **one file**: baseline `cp <file> <scratch>/<name>.orig` (the working tree, never HEAD: repairs are uncommitted), and a 0-byte `.orig` for a non-empty file aborts the canary; the break goes in a **non-test file the repair changed**, inside the function body (a parse error is not a canary); RED = `$?` non-zero **and** the assertion named; restore with `cp`, then `git diff --stat` equals its pre-canary value; after the last canary, re-run the unit gate. Never `git stash` (the tree may be shared with another session), never `git checkout --` on the tree.
 - Whoever changes visible behavior updates the test in the same commit: grep `tests/` for the disappearing string before committing.
 - A stale test is fixed against the **property** ("the count next to each row tells the truth"), never against today's value.
 - The guard covers one request; the round sits above it: tests that start from red.
@@ -64,8 +66,8 @@ The path is the briefs: `briefs/phase-1-gates.md` R1.1, R1.2–R1.4 (verify scri
 
 | Class | What stops it |
 |---|---|
-| A non-serializable value crossing server to client | only the build |
-| A blocking lint rule the type checker cannot see | lint at zero Error |
+| A non-serializable value crossing server to client | dev, on the routes you open; the build, on every prerendered route |
+| A blocking lint rule the type checker cannot see | lint at zero Error — its own verify step on Next.js 16+, which no longer lints in the build |
 | A green test papering over the fake/real difference | "tested against" plus an intercepted real adapter |
 | A guard sitting inside a loop | tests starting from red plus a contract on the ports |
 | Comparing different shapes of the same data (re-read dates) | a test on both literal forms |
@@ -78,10 +80,10 @@ The path is the briefs: `briefs/phase-1-gates.md` R1.1, R1.2–R1.4 (verify scri
 
 ## Known traps
 
-- **`build | tail`**: the exit status is `tail`'s, not the build's.
+- **`build | tail`**: the exit status is `tail`'s, not the build's. On PowerShell the same pipe masks `$?` but not `$LASTEXITCODE` `[POSIX Issue 8 § 2.9.2]`.
 - **`npm test` running e2e** in place of unit tests.
-- **The dev server lies** about some interactions: whatever shows red in dev gets re-tested against build plus start.
-- **Repeated `--mutate`** does not accumulate: pass a comma-separated list; self-check modules that are unkillable by construction must be excluded.
+- **The dev server is a different build** (`.next/dev` vs `.next`): whatever shows red in dev is re-tested against build plus start.
+- **Repeated `--mutate`**: do not assume repeated flags accumulate; pass one comma-separated list (verified against the installed Stryker); self-check modules that are unkillable by construction must be excluded.
 - **A suppression with no stated reason**, or placed somewhere it does not actually suppress anything (JSDoc, a multi-line comment).
 - **Inferring a channel's health** from the channel next to it.
 - **A red left red** for days: it turns into background noise, and a real regression stops standing out.

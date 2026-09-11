@@ -1,0 +1,46 @@
+# Audit summary — `harden-codebase-properly` at `c32367a`
+
+Run on 2026-09-11, branch `evolve/audit-01`, using the skill's own method against itself: seven read-only Opus agents in two waves (integrity, cold-start usability, three evidence slices, coverage, failure modes), synthesis by the orchestrator, six patch authors on disjoint file groups, one verifier. Every report is under `audit/`; every citation was fetched in this session and is listed in `audit/sources.md`; every reversible choice has a record under `docs/decisions/`.
+
+## Is this skill effective at hardening, today, as written?
+
+**Not yet, and the reasons are specific.** The method is stronger than any standard it was checked against on the part no standard covers: the canary as an admission criterion, "tested against" per test, an evidence ledger that refuses prose, an exit code never read through a pipe, a verifier that is never told what to ignore, a capped rejection cycle ending in a written ruling. Seventeen such controls were found that ASVS, the OWASP Top 10s, CWE, SSDF, SLSA, SRE, DORA, WCAG and Diátaxis do not ask for. But as written at `c32367a`, a cold orchestrator following the text would: run a permission check that reads the most permissive state as clean; run a canary that reverts the phase's own uncommitted repair and reports the restore as verified; dispatch Phase 0 in a way the text contradicts two lines later; accept a ledger line for a file that does not exist; dispatch three Phase 4 agents onto the same action files "in parallel on distinct files"; and ship a product with no object-level authorization, no rollback for anything it applied, and no supply-chain control, because none of the six areas names them. More than half of its normative lines are one project's habits presented in the same voice as a WCAG clause, and nothing in the corpus verifies itself. The repair phases and the verifier had never run live, and this audit is the first time the verifier's own protocol was executed: it failed on three of five cases. After the changes in this PR, the instructions that were false are true, the protocol that destroyed work is safe, the four missing controls are in the checklists, and the craft is labeled. What remains unproven is the same thing that was unproven before: a live run on a host project. The skill says so now, before the plan question instead of after.
+
+## The count that matters
+
+Across the six `areas/` files and the `SKILL.md` rows that restate them, **321 normative claims** were traced: 44 to a standard at clause level (13.7 %), 50 to published evidence (15.6 %), 48 to a vendor document with a version range (15.0 %), 14 to a check the skill describes but does not ship (4.4 %), and **165 to craft, n=1 (51.4 %)**. **Most of this corpus is class C.** Of the 165 craft rows, one was labeled as craft; the one provenance sentence lives in `README.md`, which no mode loads. Zero rows were mechanically self-verifying: the skill ships prose and no check. Of the eight load-bearing claims, one is false (`create or replace function` resets grants: PostgreSQL 12–18 say the opposite), five are true with a caveat the text omits, one is true but version-stale (the Next.js cache API), and one could not be verified against any vendor document.
+
+## The ten findings that matter
+
+1. **The permission check passes the defect it exists to catch.** `array_to_string(proacl, …)` prints an empty cell for a NULL ACL, which is PostgreSQL's default privileges: `EXECUTE` to `PUBLIC`, plus Supabase's default grants to `anon` and `authenticated`. The RLS query counts policies and never reads the predicate; `using (true)` reads clean. Retyped in three files, wrong in all three. (`01` A6-02, A6-05; `03b` DS-W3; `05` A7-29)
+2. **The canary destroys work and reports success.** Repairs are uncommitted by rule, so `git show HEAD:<file>` is the pre-repair code; the restore reverts the repair; `cmp` is silent. On a new file the redirect truncates the baseline to zero bytes and the restore empties the test. Run and shown in scratch repos. Nothing re-runs after the restore. (`05` A7-08, A7-09, A7-12)
+3. **The verifier can be satisfied for the price of one line not written.** The canary's test list comes from the repair agent's own report, the one source the verifier is told not to trust; a test that asserts a fixture declared inside itself passes every step with the product unrepaired. (`05` A7-01, A7-02)
+4. **The ledger is unguarded.** No rule requires an evidence path to exist; the verdict is transcribed, never copied; resume opens three files against about sixty-three evidence cells; the re-diagnosis never checks the ledger. A one-line path check closes it. (`05` A7-13, A7-14, A7-15)
+5. **Object-level authorization is unreachable.** Deny-all RLS with grants held by `service_role`, and the data layer on the service key: RLS is never evaluated on a request path. The only application-side control is "every exported action *textually* contains a role guard". Nothing asks whether user A can read user B's record. (`04` A6-04, A6-05, A6-06)
+6. **Rollback does not exist.** Zero occurrences of rollback, revert, backout or down migration in 28 files, in a method that applies migrations, grants, cache semantics and a whole environment, whose own P1 definition is "one step from irreversible". Supply chain and input validation at the boundary are absent the same way. (`04` A6-14, A6-01, A6-11)
+7. **Three load-bearing vendor claims are false or stale for the installed major.** `create or replace` does not reset grants; `next build` no longer lints on Next.js 16, so "lint Errors block the build" lets Errors ship with a green build; `updateTag` throws outside a Server Action, so "invalidate inside the shared service" throws on the webhook path. The corpus violates its own trap: "verify against the installed package". (`03b` a; `03a` Q-G2, F-T6, F-T12)
+8. **Phase 0 cannot be dispatched as written, and the plan orders itself on numbers nobody measures.** "Six agents in one message" versus "D0 first, the others receive `<map>`"; the multiplier table needs `copies` and `churn`, which this skill excludes by design. A dead agent deadlocks "no polling" against "when all reports are in". (`02` A2-01, A2-02, A2-28)
+9. **Parallel dispatch has no allocation step.** "Non-overlapping files" is promised, never computed or checked; R4.6, R4.8 and R4.10 own the same action files in one parallel stage; a clobber shows as one ` M` line and re-verification's "only the fix's diff" never re-checks the loser. Phase 7 never reads the defect register, so a parked P1 ships unnamed in signed minutes. (`05` A7-22, A7-23, A7-24, A7-16)
+10. **The skill describes eighteen mechanical guards and ships none**, re-derived per project at an estimated 495k tokens per run with a different result each time; `maintain` asks to "check each guard's presence with its command" and no command exists. Every mode also has hidden load-list dependencies, including the common repair header that six briefs reference and `run <N>` never loads. (`02` A2-22; `01` A2-02, § 2)
+
+## The three highest-leverage changes
+
+1. **`sql/verify-permissions.sql` and the canary protocol rewrite** (backlog C-02, F-03): the two places where the skill's strongest controls silently inverted. One shipped file replaces three wrong copies; six lines replace the protocol that reverted repairs.
+2. **Object-level authorization, rollback, supply chain and boundary validation as checklist lines in the areas that already own the subject** (V-01…V-04), plus five "neither" bullets in § When not to use it. No new phase; about nine hundred words; four P1 classes closed.
+3. **The default-provenance sentence plus citation keys** (E-01): one sentence in `SKILL.md` makes 164 unlabeled craft rows self-identifying, and short keys mark the rows that rest on HTML, PostgreSQL, ASVS, WCAG, POSIX and RFC 9111, so a verifier can cite a law and may not cite a habit.
+
+## What was deliberately not done
+
+The eighteen executable guards (`scripts/`, `rules/`, fixtures, a JSON stack map) are specified in `audit/specs/executable-assets.md` and left as an issue: untested tooling contradicts the skill's own rule that a rig must have failed once before it counts, and this run had no host project to fail it on (decision 002). Splitting `procedure.md` § Phases into per-phase files (about 1,200 tokens saved per `run`) is left as an issue. The sibling skill's territory was not touched. No phase was added; a `triage` mode was (decision 003), on the argument that it does not weaken the evidence discipline.
+
+## Numbers
+
+| | |
+|---|---|
+| Files read in full | 28 of 28, plus `.gitattributes` |
+| Findings, wave 1 + 2 | 46 integrity · 36 usability · 29 coverage · 30 failure modes · 3 evidence slices with 321 traced rows |
+| Hypotheses (§ 5.4) | 6 CONFIRMED · 4 PARTIALLY CONFIRMED · 0 REFUTED (three partials refuted on their sharpest point) |
+| Load-bearing claims | 1 FALSE · 5 TRUE-WITH-CAVEAT · 1 VERSION-STALE · 1 COULD NOT VERIFY |
+| Backlog rows | see `06-backlog.md`: applied in wave 3, spec'd, or issued |
+| Sources fetched | listed in `sources.md`; could-not-verify list at its end |
+| Corpus before / after / budget | 28,768 / 33,622 at verifier round 1 (final in `verification.md`) / 33,083; decision 009 |

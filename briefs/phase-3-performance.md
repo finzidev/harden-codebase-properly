@@ -34,10 +34,10 @@ DONE: reads before/after per route.
 ### R3.4 Peripheral cache with tags and invalidation in the service
 `model: sonnet` · files: `lib/peripheral-cache` and `lib/invalidation` (or the host project's equivalents), the services that write, test `revalidate-two-paths.test.ts` (or the host project's equivalent)
 CONTEXT: peripheral data reread on every interaction: <list>; writes that change it: <service:function>; different paths that call the same service: <list: action, sync, import>.
-GOAL: cache only on stable peripheral data, short TTL AND tags; invalidation co-located with the write **inside the service**; a written list of what never enters the cache (consents and deletions, locks and revocations, pre-deletion counts, data-layer health, the number on the "apply to all" button); a `catch` that swallows exactly one recognized condition and rethrows everything else.
+GOAL: cache only on stable peripheral data, short TTL AND tags; invalidation co-located with the write **inside the service**; a written list of what never enters the cache (consents and deletions, locks and revocations, pre-deletion counts, data-layer health, the number on the "apply to all" button); a `catch` that swallows exactly one recognized condition and rethrows everything else; verify the invalidation API against the installed major (this brief assumes `unstable_cache` / single-argument `revalidateTag`: Next.js 14–15; on 16 use `revalidateTag(tag, { expire: 0 })` from shared services, never `updateTag` outside a Server Action).
 DON'T: invalidate from the action; use an empty `catch {}`; cache anything used to decide something.
 TEST: a test that writes through two paths (an action and a second path) and reads fresh; canary: remove one invalidation, the test must turn red.
-DONE: table tag | who invalidates | where; the non-cacheable list in the code.
+DONE: table tag | who invalidates | where; the non-cacheable list in the code; the one-line kill switch that turns the cache off, and the test that the product is correct with it off.
 
 ### R3.5 Per-request timeout, batched parallel pagination on top
 `model: sonnet` · files: pagination/resilience helpers in the data layer, the loops found by D3, test

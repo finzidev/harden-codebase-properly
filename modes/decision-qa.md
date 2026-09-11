@@ -42,7 +42,7 @@ Rules:
 - The recommended option is listed first and marked "(Recommended)".
 - Options are exclusive; if two can coexist, they are one option.
 - A question that only has one honest option is not a question: decide, record, move on.
-- Never more than one question round per phase, unless a P1 blocks the phase midway.
+- Never more than one question round per phase, asked once the repair step has produced the artifacts it approves (a migration, a live-test plan), unless a P1 blocks the phase midway. Phase 7 is the declared exception: one go-ahead per step, because each acts on a live environment the previous step created.
 - Never re-ask a question that has a record; link the record instead.
 
 ## What happens with the answer
@@ -68,4 +68,4 @@ Decision questions of the first step: <list, in the question format above>
 
 ## Client questions
 
-Product questions the client must answer live in the client table of `docs/decisions/README.md`, one row per question, with the record that instructs it and what it blocks. Organizational questions (accounts, domains, cards, keys) live in `docs/client/open-questions.md`. Internal questions (waiting for whoever leads the project) are a separate table and are never taken to a client meeting. All written in the host project's language.
+Product questions the client must answer live in the client table of `docs/decisions/README.md`, one row per question, with the record that instructs it and what it blocks. Organizational questions (accounts, domains, cards, keys) live in `docs/client/open-questions.md`. Internal questions (waiting for whoever leads the project) are a separate table and are never taken to a client meeting.

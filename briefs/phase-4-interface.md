@@ -2,16 +2,16 @@
 
 Common header: as in `phase-1-gates.md`, plus: **the table shell and the field registry are built by the sibling skill `design-software-properly` (Phase 3)**: repairs here land on the shell when it exists, on the existing list components otherwise, and are repeated once the shell arrives; never add a per-caller parameter to a shared component to make a repair fit. Reference: `areas/interface.md`, `areas/user-communication.md`.
 
-**In stages.** Stage A: `R4.1` alone (tokens: everything else renders through them). Stage B: `R4.2`–`R4.10` in parallel on distinct files. Between stages: the verifier.
+**In stages.** Stage A: `R4.1` alone (tokens: everything else renders through them). Stage B: `R4.2`–`R4.10` in parallel on distinct files, per the allocation table: the server-action files have one owner, `R4.6`; `R4.8` and `R4.10` receive them as "stop and say so" and report what they need changed there. Between stages: the verifier.
 
 ---
 
 ### R4.1 Color tokens and color-by-verb language
-`model: sonnet` · files: CSS tokens, button classes, `docs/conventions/color-language.md` (these are defaults: if the host project already has a docs language and folder convention, use it — the stack map records it)
+`model: sonnet` · files: CSS tokens, button classes, `docs/conventions/color-language.md`
 CONTEXT: button variants today: <list>; colors outside the tokens: <n> (from D4); color by section? <yes/no>.
 GOAL: variants = verbs (create / send / destroy filled / revoke outlined / archive / go-back neutral / navigate transparent); one page that states the meaning of every variant; no color or spacing value outside the tokens; the section color stays a separate variable.
 HOW: replace arbitrary colors with tokens; map every existing button onto its verb; the transparent variant never carries a destructive action.
-TEST: grep `#[0-9a-f]{6}|\[[0-9]+px\]` on the components = 0 or documented; build green.
+TEST: grep `#[0-9a-fA-F]{3,8}|\[[0-9]+px\]` on the components = 0 or documented; build green.
 DONE: table variant | verb | where used.
 
 ### R4.2 Auto-apply filter panel
@@ -35,7 +35,7 @@ CONTEXT: records always in edit mode: <list>; `disabled` on editors: <file:line>
 GOAL: record read-only by default; "Edit" as `?edit=1` with `history.replaceState`; editors **mounted and hidden** with CSS, never `disabled` and never unmounted; `beforeunload` only when dirty.
 HOW: the submitted `FormData` must contain every field even after read → Edit → Cancel → Edit.
 TEST: a test that reads the real `FormData` and counts the fields; canary: put `disabled` on one field, the test must turn red.
-DONE: `grep disabled` on the components = 0 or documented; records converted.
+DONE: `grep -rn "disabled" <components>` = 0 or documented; records converted.
 
 ### R4.5 Two tracks for actions
 `model: sonnet` · files: the tables with bulk actions exposed as a row button, `useRowSelection` (or the host project's equivalent)
@@ -73,7 +73,7 @@ CONTEXT: fields without a label: <n>; non-obvious ones without a hint: <n>; icon
 GOAL: every field with a real label (the placeholder is not a label), required marked, a hint for format, example or effect where the field is not obvious, an error next to the field with the identical wording across every entry point (create, edit, import); every icon with no text carries a tooltip AND `aria-label`; a glossary with one name per concept and a script that hunts for forbidden synonyms in sources, the guide, and email templates.
 DON'T: write a hint that repeats the label; use a mouse-only tooltip; use internal code terms in user-facing text.
 TEST: grep of fields without a label = 0; grep of icons without `aria-label` = 0; glossary script at zero; test that the validation wording is identical across entry points.
-DONE: before/after counts; glossary with the terms and the synonyms replaced.
+DONE: before/after counts; glossary with the terms and the synonyms replaced; table headers associated, `autocomplete` on personal-data fields, focus placed after Edit and after an auto-applied filter, row-action targets ≥ 24 px `[WCAG 2.2 SC 1.3.1, 1.3.5, 2.4.3, 2.5.8]`.
 
 ### R4.10 Outcomes after every action, confirmations with quantities, announced expirations, self-explaining reports
 `model: sonnet` · files: outcome component (toast or banner, with `aria-live`), actions with a generic outcome (from D4), confirmations for irreversible actions, the three expiry points (session, lock, token), the reports (import, sync, send)

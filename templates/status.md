@@ -2,8 +2,10 @@
 
 Host language: <language> · Stack map: `docs/remediation/00-diagnosis/stack-map.md` · Started: <date>
 Current phase: <N> · Open ask-first items: <n> · Parked rulings: <n> · Last re-diagnosis: <date or —> · Last drift check: <date or —>
+Applied to the real database: <migration|grant> on <date>
+Working tree: uncommitted repairs from phases <list> · guards wired into CI: <yes/no> · new environment: <none|name>
 
-Rules: a row without evidence is not done. Evidence = path, command with exit code, record number, verdict line. Phase N+1 does not start while phase N has an empty evidence cell (unless a ruling line in `defect-register.md` explains it).
+Rules: a row without evidence is not done. Evidence = an existing path, a command with exit code, a record number, the verdict line copied byte-for-byte. Before any dispatch and on resume: `grep -oE '[A-Za-z0-9_./-]+\.md' docs/remediation/status.md | sort -u | while read -r p; do [ -f "$p" ] || echo "MISSING EVIDENCE: $p"; done`; a missing path empties its cell. Phase N+1 does not start while phase N has an empty evidence cell (unless a ruling line in `defect-register.md` explains it).
 
 ## Phase 0 — diagnosis
 
@@ -21,7 +23,7 @@ Rules: a row without evidence is not done. Evidence = path, command with exit co
 | N.1 Briefs filled from the synthesis and lessons | | | orchestrator | |
 | N.2 Dispatch (agents: …) | | | orchestrator | |
 | N.3 Synthesis written | | | orchestrator | |
-| N.4 Decisions: records <numbers> / ask-first batched | | | orchestrator | |
+| N.4 Decision: records <numbers>; one batched question, asked once the repair step has produced the artifacts it approves; a P1 midway is the only second round | | | orchestrator | |
 | N.5 Repairs (reports: …) | | | R… | |
 | N.6 Variant search done for every closed defect | | | R… | |
 | N.7 Verification verdict | | | verifier | |

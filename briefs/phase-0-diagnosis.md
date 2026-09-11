@@ -1,11 +1,11 @@
 # Phase 0 brief: read-only diagnosis
 
-Six agents, `model: sonnet`, all `run_in_background`, all in one message. Every brief starts with the common header and ends with the common closing. Fill in `<…>`.
+Dispatched in two waves (`modes/diagnose.md` § 1); the size band may drop D3/D5. Every brief starts with the common header and ends with the common closing. Fill in `<…>`.
 
 ## Common header
 
 ```
-You are READ-ONLY. Do not modify any project file and do not run commands that write (no install, no build that writes into the repo, no migrations, no push). Repo: <repo>. Stack: <stack>. Map of local names: <map>.
+You are READ-ONLY. Do not modify any project file and do not run commands that write (no install, no build that writes into the repo, no migrations, no push). Measures marked [needs a running app] are reported "deferred to R5.6", never "not measured"; the plan says who provides the environment. Repo: <repo>. Run every command from <repo>; <src> is the source root. Stack: <stack>. Map of local names: <map>.
 Today's date: <date>. Every number you write carries the date and the command that reproduces it. If you can't find something, write "not found"; if you can't measure it, write "not measured" — never zero.
 Do not report secrets, keys, real project URLs, or personal data.
 Write the report in the host project's language (see <map>); if unknown yet (D0), use the language of the project's README and commits.
@@ -15,11 +15,9 @@ If the session has an MCP server or a database CLI, verify BEFORE using it that 
 ## Common closing
 
 ```
-Report format: `templates/diagnosis-report.md` (sections: Measures | Defects found while reading, NOT repaired, each with severity P1/P2/P3, effort S/M/L, and where it lands | Looks wrong but is fine: what you evaluated and ruled out as a defect, and why | Proposals with cost and risk | Limits of the method). When in doubt between a defect and a deliberate choice: an open question, not an assertion. If a previous report for the same area exists in <remediation>, read it first and mark every one of its defects RESOLVED / UNCHANGED / NEW. Max <2200> words.
-WRITE the report to <remediation>/00-diagnosis/<area>.md and reply here with ONLY 5 lines: file written, number of measures, number of defects, top 3 findings.
+Report format: `templates/diagnosis-report.md` (sections: Measures | Defects found while reading, NOT repaired, each with severity P1/P2/P3, effort S/M/L, and where it lands | Looks wrong but is fine: what you evaluated and ruled out as a defect, and why | Proposals with cost and risk | Limits of the method). When in doubt between a defect and a deliberate choice: an open question, not an assertion. If a previous report for the same area exists in <remediation>, read it first and mark every one of its defects RESOLVED / UNCHANGED / NEW. Max 2200 words.
+WRITE the report to <remediation>/00-diagnosis/<area>.md — D0 stack-map.md, D1 quality.md, D2 data-security.md, D3 performance.md, D4 interface.md, D5 method-documentation.md — and reply here with ONLY 5 lines: file written, number of measures, number of defects, top 3 findings.
 ```
-
-These are defaults: if the host project already has a docs language and folder convention, use it (the stack map records it).
 
 ---
 
@@ -28,7 +26,8 @@ These are defaults: if the host project already has a docs language and folder c
 ```
 GOAL: state what the things the procedure names generically are called HERE, so the other agents don't guess.
 READ: package.json (scripts, dependencies), the linter config, the test runner config, the framework config, the migrations folder, the CI config if any, the README, any CLAUDE.md or docs/conventions.
-PRODUCE a table "generic name | name here | command | notes" for: real production build; typecheck; lint; unit tests; e2e tests; custom static analysis; single verify script (does it exist?); public actions / endpoints folder; domain folder; adapters / data-access folder; infrastructure folder; components folder; database (type, how to reach it read-only, CLI, MCP); migrations (folder, tool, how they're applied); cache (mechanism, tags, invalidation); skeletons per route (mechanism); decision register; docs index; acceptance checklist; user guide.
+PRODUCE a table "generic name | name here | command | absent here; replaced by | notes" for: real production build; typecheck; lint; unit tests; e2e tests; custom static analysis; single verify script (does it exist?); public actions / endpoints folder; domain folder; adapters / data-access folder; infrastructure folder; components folder; database (type, how to reach it read-only, CLI, MCP); migrations (folder, tool, how they're applied); cache (mechanism, tags, invalidation); skeletons per route (mechanism); decision register; docs index; acceptance checklist; user guide.
+A control with no counterpart on this stack is written here with its replacement, or "dropped"; "not measured" is for a control that exists and could not be read.
 Add: the three most-visited pages (from the main navigation) and the main entity (the largest table).
 LAYERS: not classified here. If the sibling skill `design-software-properly` has produced a stack map (`docs/design/00-diagnosis/stack-map.md`), copy its table and its layer map and add only what is missing; the folders named above are enough for the static rules of Phase 1.
 PROCESSES: list the three to five processes that cross the most modules (e.g. enrollment → external payment → member area → accounting → seats taken; order → warehouse → invoice), each with the modules touched in order, the tables written, and the external calls. This is the list Phase 2 (webhooks, idempotency) and Phase 5 (one flow test each) work on; the sibling skill `design-software-properly` measures their coupling (its diagnosis D3).
@@ -49,6 +48,7 @@ MEASURE:
 7. Acceptance checklist: does it exist? is it generated from the code? does it have automated checks?
 8. Fixture corpus: does it contain deliberately injected defects with an oracle?
 9. Mutation testing: configured? latest score with a date?
+10. CI workflow: token permissions and action pinning (read, not judged).
 DEFECTS: e2e red for days; undeclared tests that cross fake/real; suppressions without a reason; `npm test` that doesn't do what its name says.
 ```
 
@@ -58,9 +58,9 @@ DEFECTS: e2e red for days; undeclared tests that cross fake/real; suppressions w
 GOAL: permissions, secrets, migrations, environments, channels. Reference: areas/data-security.md, "What to measure". SELECT queries ONLY.
 MEASURE:
 1. Env module: does it exist? fail-fast in production? check that it's "not the placeholder"? distinct secrets for distinct purposes?
-2. Secrets: public variables that contain keys (grep `NEXT_PUBLIC_` or equivalent); tracked `.env*` files; scan with gitleaks if available (`npx gitleaks detect --no-git` or `--no-banner`; if unavailable, "not measured").
-3. Row-level security: `select tablename, rowsecurity from pg_tables where schemaname='public'`; `select * from pg_policies` (or equivalent). If the DB is unreachable: "not measured".
-4. Function grants: `select p.proname, array_to_string(p.proacl,' | ') from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'`. List the ones executable by public roles.
+2. Secrets: public variables that contain keys (grep `NEXT_PUBLIC_` or equivalent); tracked `.env*` files; scan with `gitleaks dir . --no-banner` (a Go binary from github.com/gitleaks/gitleaks, not an npm package); if absent, "not measured".
+3. Row-level security and grants: run `sql/verify-permissions.sql` (shipped with this skill) as `anon` and as `authenticated`. If the DB is unreachable: "not measured".
+4. From its output: functions with a null or public-executable ACL, tables with `rowsecurity` off or `forcerowsecurity` off, and **every policy's `qual`/`with_check`**: `true`, null, or no session function = P1 candidate. Read the predicate, not the count.
 5. Migrations: count; idempotent (`if not exists`)? squashed? functions rewritten more than once: does each rewrite start from the latest definition? does it reassert the grants?
 6. Environments: do the CLI/MCP point to the same project as the app? (compare project reference / env host, without reporting the values).
 7. Tokens and sessions: does the check distinguish unreadable / bad signature / expired? does the embedded expiry win even with the DB reachable? does changing the password revoke sessions?
@@ -69,6 +69,9 @@ MEASURE:
 10. Backup: is success read from the last link in the chain, or from the first 200?
 11. Navigation after a write: client `router.push` after a server action?
 12. Test/reset endpoints: disabled in production, with verification?
+13. Supply chain: dependency audit output (High/Critical count, command) · lockfile present and CI actions pinned to a commit (yes/no) · an SBOM command exists (yes/no).
+14. Input validation: server actions and route handlers whose arguments are parsed against a schema before first use: count / total.
+15. Web surface, greps: `dangerouslySetInnerHTML|innerHTML|srcdoc`, redirect targets built from a request value, `fetch(` with a URL built from a request value, upload handlers: hits with file:line.
 DEFECTS: sensitive function executable by public roles; missing policies; public secret; date comparison as strings; channel never tested; backup read from the first link.
 ```
 
@@ -84,7 +87,7 @@ MEASURE:
 5. Cache: mechanism; tags; who invalidates and where (service or action); does it hold data something is decided on (consents, locks, pre-deletion counts)? empty `catch {}` around invalidations?
 6. Timeouts: request loops inside a guard designed for a single request.
 7. Hot columns without an index (read the migrations); SQL expressions (`unaccent(`, `lower(`, `nullif(`) inside `.order(`/`.eq(` in application code.
-8. Caps: `grep -rnE "limit: ?[0-9]{3,}"` in bulk actions; do they declare the truncation?
+8. Caps: `grep -rnE "\.limit\(|limit:\s*[0-9]{3,}" <src>` in bulk actions; do they declare the truncation?
 9. Skeletons per route: how many routes with reads have one.
 10. Baseline: IF the real database (or a bench of the same cardinality) is reachable read-only, measure ms and round-trips for the three hot pages, with the main table's cardinality and the date. Otherwise "not measured", and write what's needed to measure it.
 DEFECTS: full scan on a hot path; cache on decision-critical data; empty `catch {}` on invalidation; loop inside the guard; undeclared cap; estimate instead of a count.
@@ -100,12 +103,12 @@ MEASURE:
 3. Editors: `grep -rn "disabled" <components>`; entities always in edit mode, or read-only by default?
 4. Actions: bulk actions as a row button? an irreversible action reachable from the entity page?
 5. Feedback: commands with no pending state; `{ok:true}` outcomes standing in for different outcomes.
-6. Color: button variants and their meaning; `grep -rnE "#[0-9a-f]{6}|\[[0-9]+px\]"` outside the tokens; color by verb or by section?
+6. Color: button variants and their meaning; `grep -rnE "#[0-9a-fA-F]{3,8}|\[[0-9]+px\]" <components>` outside the tokens; color by verb or by section?
 7. Skeletons per route; ARIA on sortable headers; country icons (emoji? CDN?). Navigation: sidebar push or overlay; breadcrumb; home page as a total or a difference.
-8. Communication with the user (areas/user-communication.md): technical errors sent to the client (`grep -rn "error.message\|String(err\|digest\|JSON.stringify(err"` in components and actions); lists that render an error down the "empty" branch; zeros standing in for "not recorded"; actions with no outcome or a generic "Done".
+8. Communication with the user (areas/user-communication.md): technical errors sent to the client (`grep -rn "error\.message\|String(err\|digest\|JSON.stringify(err" <components> <actions>` in components and actions); lists that render an error down the "empty" branch; zeros standing in for "not recorded"; actions with no outcome or a generic "Done".
 9. Fields: inputs with no `<label>` and no `aria-label`; placeholder used as a label; non-obvious fields with no hint; required fields not marked; validation copy that differs between create, edit, and import for the same field.
-10. Icons and confirmations: icon-only buttons with no `title`/`aria-label`; confirmations of irreversible actions with no quantity shown; what a user sees on returning with an expired session or lock (a stack trace, a blank page, a password prompt?).
-11. Glossary and accessibility: different terms for the same concept across the UI, guide, emails, reports (table: term | where); visible focus on tab; `aria-live` on messages; a real report (import, sync) read without the code: is it understandable? do the rejects say why?
+10. Icons and confirmations: icon-only buttons with no `title`/`aria-label`; confirmations of irreversible actions with no quantity shown; what a user sees on returning with an expired session or lock (a stack trace, a blank page, a password prompt?) [needs a running app].
+11. Glossary and accessibility: different terms for the same concept across the UI, guide, emails, reports (table: term | where); visible focus on tab [needs a running app]; `aria-live` on messages; a real report (import, sync) read without the code [needs a running app]: is it understandable? do the rejects say why?
 Compare every item of "Target state" from `areas/interface.md` AND `areas/user-communication.md` against what actually exists: table item | status | evidence.
 DEFECTS: `disabled` on an editor; an irreversible action next to a reversible one; facets on the wrong population; technical error on screen; error rendered as empty; field without a label; expiry rendered as an error.
 ```

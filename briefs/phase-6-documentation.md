@@ -7,7 +7,7 @@ Parallel: all of them with each other, except `R6.2`, which runs after `R6.1`.
 ---
 
 ### R6.1 Counted index
-`model: sonnet` · files: `docs/INDEX.md` (these are defaults: if the host project already has a docs language and folder convention, use it — the stack map records it)
+`model: sonnet` · files: `docs/INDEX.md`
 GOAL: a single front door with one line per folder (role, file count from the command, "where to start"); a "if you want to know… read…" table.
 HOW: `find docs -type f | sed 's|/[^/]*$||' | sort | uniq -c`; write the count with the command next to it, in a comment.
 DONE: every folder has a line; counts are reproducible.
@@ -32,7 +32,7 @@ CONTEXT: guide today: <generated / hand-written / absent>; undocumented routes: 
 GOAL: a printable guide generated from the same source as the in-app guide; every step with the words someone would search for; figures as real screenshots or declared placeholders (never gaps); `coverage.md` that cross-checks the real routes against the source and lists the gaps.
 DON'T: use drawings instead of screenshots; keep sections that name commands that no longer exist.
 TEST: coverage script exits 0 or lists the gaps; grep of the vanished commands = 0.
-DONE: routes covered / uncovered; missing screenshots listed for capture.
+DONE: routes covered / uncovered; missing screenshots listed for capture; the guide opens with one tutorial (first day, one task end to end) and its own pages pass the label/contrast checks.
 
 ### R6.5 Debt register with a reopening trigger
 `model: sonnet` · files: `docs/planning/TECH-DEBT.md`, the markers in the code
@@ -50,7 +50,7 @@ DONE: count per list, with the date.
 ### R6.7 Operational runbooks
 `model: sonnet` · files: `docs/operations/BACKUP-RESTORE.md`, `MONITORING.md`, `ACCESS-REVOCATION.md`, `RELEASE.md`
 CONTEXT: existing: <list>; executed: <yes/no>.
-GOAL: every runbook with executable steps, where the outcome is read (run log line, query), a "what it hits, what it doesn't" table for revocation, a "migration before code" checklist for release; whatever has never been executed is **declared** as such at the top.
+GOAL: every runbook with executable steps, where the outcome is read (run log line, query), a "what it hits, what it doesn't" table for revocation, a "migration before code" checklist for release; whatever has never been executed is **declared** as such at the top. `MONITORING.md`: the request id and where it appears (log, screen), the events that must be logged with actor/object/instant, retention, alert routing (who, after how many, for how long).
 DONE: runbooks written; not-executed declarations with their date.
 
 ### R6.8 Architecture and features against the code

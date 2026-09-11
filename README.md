@@ -10,13 +10,21 @@ The structural half (layers with an enforced dependency rule, bounded contexts a
 git clone https://github.com/finzidev/harden-codebase-properly.git ~/.claude/skills/harden-codebase-properly
 ```
 
+Structural steps in the plan need the sibling skill; install it too:
+
+```bash
+git clone https://github.com/finzidev/design-software-properly.git ~/.claude/skills/design-software-properly
+```
+
+Without it the diagnosis still runs: structural defects are listed and the plan marks them "sibling skill not installed".
+
 Then, in a session open on the project you want to bring to production quality:
 
 ```
 /harden-codebase-properly diagnose
 ```
 
-Modes: `diagnose` (Phase 0 and the ordered plan; its plan question is the only mandatory user checkpoint of a remediation run), `plan`, `run <N>`, `review` (a diff against the target state), `maintain` (guard set, change-time protocol, drift check), `status` (resume). With no argument the skill reads `docs/remediation/status.md` and continues from the first step without evidence.
+Modes: `diagnose` (Phase 0 and the ordered plan; the plan question: `SKILL.md` § Non-negotiables), `plan`, `run <N>`, `review`, `maintain`, `status`, `triage`. With no argument the skill reads `docs/remediation/status.md` and continues from the first step without evidence.
 
 ## Structure
 
@@ -32,8 +40,8 @@ Modes: `diagnose` (Phase 0 and the ordered plan; its plan question is the only m
 
 ## Origin
 
-Distilled from the path of a real back-office application (Next.js 14, Supabase, ~52k contacts, 426 commits, 104 decision records, June-September 2026) and from what is useful in public skills: two-stage verification, agent context isolation, a rejection cycle with a cap and written rulings, variant search, accumulating lessons. The names (`loading.tsx`, RLS, server action, `next build`, semgrep) come from that stack; Phase 0 produces the map that translates them into the host project. Until September 2026 this content and the structural half were one skill (`design-software-properly`, whose original Italian version is preserved at its git tag `v1-it`); they were split so that each could stay vertical.
+Distilled from the path of a real back-office application (Next.js 14, Supabase, ~52k contacts, 426 commits, 104 decision records, June-September 2026; origin project, not reproducible from this repository) and from what is useful in public skills: two-stage verification, agent context isolation, a rejection cycle with a cap and written rulings, variant search, accumulating lessons. The names (`loading.tsx`, RLS, server action, `next build`, semgrep) come from that stack; Phase 0 produces the map that translates them into the host project. Until September 2026 this content and the structural half were one skill (`design-software-properly`, whose original Italian version is preserved at its git tag `v1-it`); they were split so that each could stay vertical.
 
 ## Status
 
-Proven read-only (the stack-map brief of Phase 0) on a second Next.js project. The repair phases and the verifier have not yet been proven live: the first full run is also the skill's own acceptance test, and `docs/remediation/lessons.md` is where to note what needs fixing here.
+Proven read-only (the stack-map brief of Phase 0) on a second Next.js project; the repair phases and the verifier have never run live. The first full run is the skill's own acceptance test; note what needs fixing here in `docs/remediation/lessons.md`.

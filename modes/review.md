@@ -10,7 +10,7 @@ Input: a diff, a branch, a pull request, or "what I changed today". Output: find
 4. **Gates on the diff.** typecheck, lint (zero errors), the unit tests that cover the touched files, the static rules; the real build when components or anything crossing the server → client boundary changed. Exit codes read from `$?`, never from a pipe.
 5. **Findings.** One line each: `file:line — P1|P2|P3 — <rule id or area § item> — <what is wrong> — <what to do>`. P1 = data loss, double writes, security, a guard that fails open, an irreversible action reachable; P2 = a target-state item broken; P3 = style within the rules. Every finding cites the rule; a finding without a rule is an opinion and is labeled "note".
 6. **Decisions.** A change that contradicts a decision record is a P1 until the record is superseded through the Q&A. A change that introduces a new reversible choice gets a decision question, not a silent approval.
-7. **Report.** `docs/remediation/reviews/<date>-<branch-or-pr>.md` (host project's language): scope, blast radius, findings, gates table, decision questions. Inline summary: counts by severity and the top three findings.
+7. **Report.** `docs/remediation/reviews/<date>-<branch-or-pr>.md`: scope, blast radius, findings, gates table, decision questions. Inline summary: counts by severity and the top three findings.
 
 ## What the reviewer does not do
 

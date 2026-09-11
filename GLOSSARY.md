@@ -1,10 +1,10 @@
 # Glossary
 
-Canonical software-design terms used throughout this skill, with the meaning they carry here and the Italian word used in the original. Instructions use these terms exactly; outputs (reports, decision records, commit messages) use the host project's language.
+Canonical software-design terms used throughout this skill, with the meaning they carry here and the Italian word used in the original: consult it when a name is ambiguous.
 
 ## Architecture (terms borrowed from the sibling skill `design-software-properly`)
 
-The architecture vocabulary (layers, dependency rule, bounded context, single writer, deep module, one implementation per concept, effect map) lives in the sibling skill's glossary. Only the two terms this skill uses on its own are kept here.
+The architecture vocabulary (layers, dependency rule, bounded context, single writer, deep module, one implementation per concept, effect map) lives in the sibling skill's glossary; only the two terms this skill uses on its own are kept here.
 
 | Term | Meaning here | Italian |
 |---|---|---|
@@ -16,7 +16,7 @@ The architecture vocabulary (layers, dependency rule, bounded context, single wr
 | Term | Meaning here | Italian |
 |---|---|---|
 | **Quality gate** | typecheck, lint at zero errors, unit tests, real production build, static rules with their own tests; each sees a different error class | cancello |
-| **Real build** | The only gate that prerenders and catches non-serializable values crossing the server → client boundary | build reale |
+| **Real build** | The only gate that prerenders every route without visiting it; catches non-serializable values crossing the server → client boundary | build reale |
 | **Custom static rule** | A semgrep-style rule on a domain invariant, shipped with `ruleid:`/`ok:` fixtures and run offline | regola statica |
 | **Tested against** | Header on every unit test: `fake | real adapter | both | none`; a green test on the fake certifies the fake | prova contro |
 | **Canary** | Deliberately breaking an invariant to prove the test turns red; no test is trusted before it has failed once | canarino |
@@ -38,7 +38,8 @@ The architecture vocabulary (layers, dependency rule, bounded context, single wr
 |---|---|---|
 | **Fail-fast configuration** | The app refuses to start in production if a required secret is missing, equals the example placeholder, or two secrets coincide | env fail-fast |
 | **Row-level security (RLS)** | Deny-all policies on every table; verified with a query on the database, never assumed from the repository | policy di riga |
-| **Grants** | Function privileges verified on `pg_proc.proacl`; `revoke from public` does not cover `anon`/`authenticated`; `create or replace` resets grants | grant |
+| **API roles** | `anon` and `authenticated`, ordinary Postgres roles, not PostgreSQL's `PUBLIC` | ruoli API |
+| **Grants** | Function privileges verified on `pg_proc.proacl`; a revoke from `PUBLIC` does not touch what the API roles hold; drop+create or a new signature restores defaults | grant |
 | **Idempotent migration** | Rerunnable (`if not exists`), never squashed, applied and verified before the code that uses it ships | migrazione idempotente |
 | **Single source database** | CLI, MCP and app point to the same project, verified before every write | un solo database di verità |
 | **Fail closed** | When a guard, rate limiter or token check errors, it denies; never "let it through when unsure" | fallisce chiusa |
@@ -54,7 +55,7 @@ The architecture vocabulary (layers, dependency rule, bounded context, single wr
 | **Table shell** | The one generic table component (headers, body, column picker, sorting, empty states) fed by the field registry; built by the sibling skill `design-software-properly` (brief R3.2); the five states and the filter panel land on it here | guscio tabella |
 | **Auto-apply filter panel** | Left-side filters applied after a short debounce; no "Apply" button; chips show applied state | filtri automatici |
 | **Facets on the shown population** | Counts computed on exactly the rows the table is showing (in memory or in the database on the same set) | facette |
-| **Read-only by default** | Entity pages open read-only; "Edit" is URL state (`replaceState`); editors stay mounted and hidden, never `disabled` (disabled fields are omitted from `FormData`) | sola lettura, editor montati |
+| **Read-only by default** | Entity pages open read-only; "Edit" is URL state (`replaceState`); editors stay mounted and hidden, never `disabled` (absent from `FormData`) | sola lettura, editor montati |
 | **Two tracks for actions** | Bulk actions via selection + toolbar; row actions on hover/focus; never both forms for the same gesture | due binari |
 | **Color by verb** | Same command, same color everywhere (create, send, destroy, revoke, archive, back, navigate); section color is a separate variable | colore per verbo |
 | **Command feedback** | Every command shows a pending state (`aria-busy`, dimming) and a worded outcome; skeletons only for route-level loads | segnale |
@@ -78,7 +79,7 @@ The architecture vocabulary (layers, dependency rule, bounded context, single wr
 | **Lessons file** | One line per phase: what surprised, which brief was ambiguous, which traps; read by the next phase's briefs and by whoever maintains the skill | lezioni |
 | **Ordered plan** | The work sequence computed from the diagnosis: gates first, irreversible risks next, then the multipliers this skill owns, then improvements once each, then tests and docs; structural steps are scheduled from the sibling skill | piano ordinato |
 | **Handover** | Delivery to the client: new accounts, empty database, regenerated secrets, replayed migrations, proven backup and restore, signed minutes | consegna |
-| **Mode** | The entry point chosen from the argument (`diagnose`, `plan`, `run <N>`, `review`, `maintain`, `status`); each loads only its own files | modalità |
+| **Mode** | The entry point chosen from the argument; each loads only its own files (`SKILL.md` § Modes) | modalità |
 | **Status file** | `docs/remediation/status.md`: one row per step with evidence; a row without evidence is not done; the next phase cannot start over an empty cell | file di stato |
 | **Decision Q&A** | The one multiple-choice question per phase that turns reversible choices into decision records: problem, 2-4 options with cost and risk, recommendation, what happens if nobody decides | domande sulle decisioni |
 | **Guard set** | The target-state rules a machine enforces, wired into `verify` and CI: static rules, declared tests, glossary and coverage checks, canaries, the live channel table; the structural guards are the sibling skill's | guardie |

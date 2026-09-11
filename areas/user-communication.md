@@ -2,27 +2,27 @@
 
 Principle: **the person using the product doesn't have your logs.** Everything that goes wrong, every ambiguous state, every non-obvious field gets explained on screen, in the reader's language, with the next step. A message is written for someone who didn't write the code.
 
-Note: user-facing text — messages, labels, the glossary, reports, the in-app guide — is written in the host project's language. These instructions are in English.
-
 ## Target state
 
 - [ ] **No technical error on screen**: never `error.message`, a stack trace, a digest, a raw HTTP code, or a table/field name. On screen: what happened, what the person can do, a short correlation id for support. The technical detail goes to the server log under the same id.
 - [ ] **Error ≠ empty.** An error state never disguises itself as "no results." Five states, each rendered distinguishably: loading; empty; empty-after-filter (with the search box that produced it still visible); error (with "retry"); partial or truncated ("at least N", "the first N of M").
 - [ ] An unknown value renders as "—" or "not recorded", never as 0 or an empty string.
 - [ ] **Every action responds** with a worded outcome: what was done, on how many, what wasn't, and why. Discriminated outcomes, never `{ok:true}` rendered as "Done" for different cases. An action with no visible response is a lost click.
-- [ ] **Every field has a real label** (a placeholder is not a label); every non-obvious field has a hint (expected format, example, effect); required fields are marked; validation errors sit next to the field, with **the same wording on every entry point** (create, edit, import).
-- [ ] **Every icon-only control has a tooltip and an `aria-label`**; every non-obvious command says what it does beforehand (tooltip) and what it did afterward (outcome).
-- [ ] **Irreversible actions** ask for confirmation with a quantity ("delete 43 contacts?") and a typed word, and state what will be lost.
+- [ ] **Every field has a real label** (a placeholder is not a label); every non-obvious field has a hint (expected format, example, effect); required fields are marked; validation errors sit next to the field, with **the same wording on every entry point** (create, edit, import) `[SC 3.3.2]`.
+- [ ] **Every icon-only control has a tooltip and an `aria-label`**; every non-obvious command says what it does beforehand (tooltip) and what it did afterward (outcome); the tooltip is dismissible, hoverable and persistent `[WCAG 2.2 SC 1.4.13]` and its text is contained in the accessible name `[SC 2.5.3]`.
+- [ ] **Irreversible actions** ask for confirmation with a quantity ("delete 43 contacts?") and a typed word, and state what will be lost `[SC 3.3.4]`.
 - [ ] **Long-running actions** show progress; an **expiry** (session, lock, token) is announced beforehand, and the rejection afterward is a readable request (password, new link), not an error.
 - [ ] **Reports** (import, sync, bulk send) explain themselves: accepted, rejected and why, a downloadable file of rejects, the same terminology as the interface.
 - [ ] A **glossary**: the same thing has the same name everywhere (interface, guide, email, reports, messages); no synonyms; internal code terms never surface.
 - [ ] The **guide** is reachable from where it's needed (a contextual link), searchable by intent, with real screenshots.
-- [ ] **Baseline accessibility**: visible focus, sufficient contrast, `role="status"` or `aria-live` on outcome messages, `aria-busy` during waits, commands reachable by keyboard.
+- [ ] **Baseline accessibility**: visible focus, sufficient contrast, `role="status"` or `aria-live` on outcome messages **and on the pending state** (`aria-busy` withholds, never announces) `[WAI-ARIA 1.2; SC 4.1.3]`, commands reachable by keyboard; table headers associated, `fieldset`/`legend` grouping `[SC 1.3.1]`; `autocomplete` on personal-data fields `[SC 1.3.5]`; non-text contrast: tokens, icon buttons, input borders, focus ring `[SC 1.4.11]`; predictable focus when Edit mounts editors and after auto-applied filters `[SC 2.4.3]`; row-action icons at least 24×24 `[SC 2.5.8]`.
 - [ ] Every **visible error path has a test** on the displayed text (or on the message class).
+
+The European Accessibility Act does not reach a B2B back-office (Directive 2019/882 Art. 2(2), Art. 3(20)); EN 301 549 still binds through procurement or a public-sector client, and any consumer-facing screen fed by this back-office is in scope.
 
 ## What to measure
 
-1. Technical errors on screen: grep `error.message`, `String(err`, `digest`, `JSON.stringify(err` in components and in server-action return values reaching the client; `catch` blocks that forward the raw message.
+1. Technical errors on screen: grep `error\.message`, `String(err`, `digest`, `JSON.stringify(err` in components and in server-action return values reaching the client; `catch` blocks that forward the raw message.
 2. Indistinct states: for every list component, which of the five states does it render, and does the error branch fall into "empty"?
 3. False zeros: counts that show 0 when the data is actually absent or the read failed.
 4. Actions without an outcome: actions that return with no message; a generic "Done" for different outcomes.
@@ -39,7 +39,7 @@ Note: user-facing text — messages, labels, the glossary, reports, the in-app g
 
 The path is the briefs: `briefs/phase-4-interface.md` R4.8–R4.10; the static rule for readable errors is built in R4.8 (R1.2 covers guards, PII in logs, service keys, server directives). Diagnosis measures: D4 items 8–11.
 
-## Rules with mechanical verification
+## Rules with mechanical verification (specified here; the brief builds the check)
 
 - No technical message reaches the client: a custom static rule on action return values and components.
 - Every list component renders the five states: a test on the shell.

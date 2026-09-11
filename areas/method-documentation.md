@@ -37,7 +37,7 @@ Principle: **documentation stays true because it is checked against the product,
 | `commercial/` | contract and quotes: never edited |
 | `archive/` | finished plans, kept as memory |
 
-These are defaults: if the host project already has a docs language and folder convention, use it (the stack map records it).
+This map partitions by audience and lifecycle, not by user need (Diátaxis: tutorial, how-to, reference, explanation); the tutorial has no folder here: at handover, R6.4's guide opens with one.
 
 ## What to measure
 
@@ -60,13 +60,11 @@ The path is the briefs: `briefs/phase-6-documentation.md` R6.1–R6.8; `briefs/p
 
 ## Document and commit style
 
-Documents, reports, decision records, and checklists are written in the host project's language; these instructions are in English.
-
 Impersonal voice; the subject is the effect on the user or the data; one sentence in two beats (what changes, then why or the flip side); no jargon in the title; documents quote the reporter's exact words, because a summary is already interpretation.
 
 Commit messages follow the host project's language; the shape is `fix(area): <what changes for the user>, <why or the flip side>`. Example shapes: "the alerts weren't firing, and never had been"; "the count is done by the database now, and the loop sits above the guard"; "a single table, filterable across the whole management system"; "a facet error stops disguising itself as 'there's nothing here.'"
 
-## Rules with mechanical verification
+## Rules with mechanical verification (specified here; the brief builds the check)
 
 - Decision record number: the first free one, found by **listing the whole folder**, never `ls | tail -1` (collides across parallel sessions).
 - Counts printed into documents by a script, never typed by hand.
@@ -81,6 +79,6 @@ Commit messages follow the host project's language; the shape is `fix(area): <wh
 - **A number in nine files**: wrong in all nine within a day.
 - **An audit applied in the same round** it was written in.
 - **"Not done" claimed from memory** on a repository with multiple sessions.
-- **`git stash` used for A/B** on a shared tree: use one file with `cmp`, or a `git worktree`.
+- **`git stash` used for A/B**: never; the tree may be shared with another session. One file with `cmp`, or a `git worktree`.
 - **An automated "dead link" check** on the documentation: confuses a deleted page with a dynamic route id; tried and dropped — the debt stays declared, with its trigger.
 - **No decision record for a non-decision or a rejected proposal**: the register is the only place they don't get lost.

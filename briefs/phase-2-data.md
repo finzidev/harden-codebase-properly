@@ -9,34 +9,34 @@ Parallel: `R2.1`, `R2.4`, `R2.5` with each other. `R2.2` and `R2.3` touch the mi
 ### R2.1 Fail-fast configuration module
 `model: sonnet` · files: config module (`lib/config/env.ts` or equivalent), `.env.example`, a test `env-placeholder.test.ts` (or the host project's equivalent)
 CONTEXT: required variables: <list from D2>; fail-fast today: <yes/no>; secrets for distinct purposes: <list>.
-GOAL: in production the app refuses to start if a required secret is missing, equals the example's placeholder, or two secrets for distinct purposes coincide; in development, a clear message.
+GOAL: in production the app refuses to start if a required secret is missing, equals the example's placeholder, or two secrets for distinct purposes coincide; in development, a clear message; the same module sets the security headers (CSP with `frame-ancestors`, HSTS, `X-Content-Type-Options`, `Referrer-Policy`) and the cookie attributes in one place.
 HOW: one module loaded at startup; validates presence, non-placeholder, shape (URL, minimum length); the error names the variable but NEVER the value.
 DON'T: log values; use silent defaults in production; use public variables for secrets.
-TEST: a test that simulates `NODE_ENV=production` with one variable missing and one equal to the placeholder: it must throw.
+TEST: a test that simulates `NODE_ENV=production` with one variable missing and one equal to the placeholder: it must throw; one test asserts the headers and the cookie attributes.
 DONE: test green, and red on the canary; list of variables with their rule.
 
 ### R2.2 Row-level security and grants: proposed migration plus verification
-`model: sonnet` · files: a new migration (not applied), a verification-query file at `<remediation>/02-data/verify-permissions.sql` (these are defaults: if the host project already has a docs language and folder convention, use it — the stack map records it)
+`model: sonnet` · files: a new migration (not applied), `sql/verify-permissions.sql` (shipped with this skill) copied into the repo as `verify-permissions.sql`
 CONTEXT: from D2: tables without a policy: <list>; functions executable by public roles: <list>; functions rewritten without reasserting grants: <list>.
 GOAL: active deny-all policies on every table; every sensitive function with an explicit `revoke execute from public, anon, authenticated` and `alter default privileges … revoke execute on functions from anon, authenticated`; grants only to the expected roles; idempotent migration.
-HOW: write the migration starting from the LATEST definition of every function (grep every migration that touches it, diff against the most recent); reassert the grants in the same migration. Write the verification queries (pg_tables, pg_policies, pg_proc.proacl) with the expected result next to each.
+HOW: write the migration starting from the LATEST definition of every function (grep every migration that touches it, diff against the most recent); reassert the grants in the same migration. Do not retype the verification queries: run `sql/verify-permissions.sql` as the API roles (`anon`, `authenticated`); a null ACL, a policy with `qual = true`, or a table with row security off is a rejection.
 DON'T: apply it; use `revoke from public` alone; rewrite a function from an old version.
 DONE: migration in the repo with a header explaining why; verification file with expected results; note in the report: "apply after the go-ahead, then run verify-permissions.sql."
 
 ### R2.3 Migrations: idempotency, replay, order relative to deploy
 `model: sonnet` · files: non-idempotent migrations (from D2), a test `migrations-idempotency.test.ts` (or the host project's equivalent), `docs/operations/RELEASE.md` (or the existing release checklist)
 CONTEXT: migrations: <n>; non-idempotent: <list>; squashes present: <yes/no>; CLI and app on the same DB: <yes/no>.
-GOAL: every migration rerunnable (`if not exists`, `drop … if exists`, `create or replace`); a test that replays them twice on an ephemeral DB, or analyzes them statically; release checklist with "migration applied and column present on the DB BEFORE the code push" and "CLI project reference = the env's host."
+GOAL: every migration rerunnable (`if not exists`, `drop … if exists`, `create or replace`); a test that replays them twice on an ephemeral DB, or analyzes them statically; release checklist with "migration applied and column present on the DB BEFORE the code push" and "CLI project reference = the env's host"; every migration carries its reverse in the same file or a written line saying why not and what the recovery is, with its data-loss window; `RELEASE.md` carries the forward order **and the backout order**, and for each step the observation that says it worked and the one that says stop.
 DON'T: squash migrations; touch the database.
-TEST: test green; canary: make one migration non-idempotent, the test must fail.
-DONE: list of migrations fixed; release checklist written.
+TEST: apply, reverse, apply again on an ephemeral database; table state matches after each; canary: remove one reverse, the test fails.
+DONE: list of migrations fixed; release checklist written; one row per migration: migration | reverse | recovery if none | data-loss window.
 
 ### R2.4 Tokens, sessions, revocation
 `model: sonnet` · files: token signing/verification module, session guards, `docs/operations/ACCESS-REVOCATION.md`, test `token-three-outcomes.test.ts` (or the host project's equivalent)
 CONTEXT: from D2: does verification distinguish the three outcomes? <yes/no>; does the embedded expiry win online? <yes/no>; does a password change revoke access? <yes/no>.
-GOAL: `verifyToken` returns a separated cause (unreadable / invalid signature / expired); online, the entity read from the DB decides; the embedded expiry is honored only offline; runbook with a "what it hits, what it doesn't" table (password, session secret, signing secret, revocation counter).
+GOAL: `verifyToken` returns a separated cause (unreadable / invalid signature / expired); online, the entity read from the DB can only narrow what the token allows; offline, the token decides; runbook with a "what it hits, what it doesn't" table (password, session secret, signing secret, revocation counter), plus two more sections: where each secret lives and its rotation trigger; leaked secret: revoke, rotate, purge, then investigate, in that order.
 DON'T: make the signature check optional; collapse everything into a single `null`.
-TEST: test on the three outcomes; test that with the DB reachable and a token expired-but-entity-still-valid, access is granted; canary.
+TEST: test on the three outcomes; with the DB reachable, the entity can only narrow what the token allows: an expired token is rejected even if the entity is valid; a revoked entity is rejected even if the token is valid; offline, the token decides `[ASVS 5.0 V9.2.1]`; canary.
 DONE: tests green, and red on the canary; runbook written.
 
 ### R2.5 Dates as instants
