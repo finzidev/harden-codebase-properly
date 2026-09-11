@@ -1,10 +1,10 @@
-# 009. The corpus exceeds the +15 % budget by about 540 words; the overage is kept, and here is what was cut in exchange
+# 009. The corpus exceeds the +15 % budget by about 600 words; the overage is kept, and here is what was cut in exchange
 
 **When:** 2026-09-11 (after wave 3; measured with `wc -w` over the loadable files, see decision 005)
 **Status:** in force
 
 ## The problem
-Budget: 33,083 words (28,768 + 15 %). Measured by the verifier after the patch set: **33,622** (+4,854, +16.9 %, 539 over); 33,462 without `sql/verify-permissions.sql`. The verifier's residues add a few dozen words more; the final figure is in `audit/verification.md`. The six patch authors received per-group caps summing to +4,400; two groups overran (areas a: +1,157 against 900; briefs b and templates: +981 against 700) because the mandated text of the P1 rows cost more than the backlog's estimate. Every other group landed at or under its cap.
+Budget: 33,083 words (28,768 + 15 %). Measured by the verifier after the patch set: 33,622 (+16.9 %, 539 over); after its residues were applied: **33,699** (+4,931, +17.1 %, 616 over); 33,539 without `sql/verify-permissions.sql`. The six patch authors received per-group caps summing to +4,400; two groups overran (areas a: +1,157 against 900; briefs b and templates: +981 against 700) because the mandated text of the P1 rows cost more than the backlog's estimate. Every other group landed at or under its cap.
 
 ## The choice
 Keep the overage. It sits almost entirely in three files, each carrying a P1 repair or a P1 coverage class: `areas/data-security.md` (+849: object-level authorization, rollback, supply chain, boundary validation, web surface, observability, the corrected grant and token claims), `briefs/verifier.md` (+248: the canary protocol that reverted repairs, the provenance of every verifier input), `modes/diagnose.md` (+304: the two-wave dispatch, the size band, the register formats a cold agent had to guess). Cutting to the line would remove the lowest-precedence rows in the backlog's order (`triage`, the regression rate, the threat list), and removing `modes/triage.md` alone (427 words) would still leave the corpus 109 words over. Correctness and coverage outrank usability in the mandate, so the usability rows are not the ones to cut to pay for a correctness overrun; the overrun is declared instead.

@@ -15,7 +15,7 @@ Guards are the target-state rules that a machine can enforce. They live in the p
 | Debt markers ↔ debt register alignment | 6 | the script built by R6.5 | R6.5 |
 | Canary switches on every harness | 2 | `CANARY=<n> <unit command>` | R5.1 |
 | Live channel table with the date of the last injected failure seen arriving | 3 | the table's last date | R2.6, R5.7 |
-| Request id end to end; must-log events | 6 | the grep from R6.7 | R6.7 |
+| Request id end to end; must-log events | 3 | the grep from R6.7 | R6.7 |
 | Cache tags: compare the tag expression at the read site and at the write site, interpolated part included, a mismatch fails; no empty `catch {}` around an invalidation | 1 | the cross-check from R3.4 | R3.4 |
 | Permissions true on the database | 3 | `sql/verify-permissions.sql` | R2.2, R7.3 |
 

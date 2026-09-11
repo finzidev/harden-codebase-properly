@@ -2,7 +2,7 @@
 
 ## evolve/audit-01 (2026-09-11) — first audit-and-repair round, against `c32367a`
 
-The audit evidence is under `audit/` (summary: `audit/SUMMARY.md`; backlog with every id below: `audit/06-backlog.md`); reversible choices are under `docs/decisions/001`–`009`. One line per backlog id, grouped by what it buys the reader. Corpus: 28,768 → 33,622 words before the verifier's residues were applied (decision 009; the final number is in `audit/verification.md`).
+The audit evidence is under `audit/` (summary: `audit/SUMMARY.md`; backlog with every id below: `audit/06-backlog.md`); reversible choices are under `docs/decisions/001`–`009`. One line per backlog id, grouped by what it buys the reader. Corpus: 28,768 → 33,699 words after the verifier's residues were applied (decision 009; `audit/verification.md` § Re-verification).
 
 ### More correct
 
@@ -103,7 +103,7 @@ The audit evidence is under `audit/` (summary: `audit/SUMMARY.md`; backlog with 
 
 ### Compression
 
-- X-01 "These are defaults…" kept in `procedure.md` § Placeholders, `briefs/verifier.md` and the common repair header of `briefs/phase-1-gates.md`; removed from eight files.
+- X-01 "These are defaults…" kept in `procedure.md` § Artifacts in the project, `briefs/verifier.md` and the common repair header of `briefs/phase-1-gates.md`; removed from eight files.
 - X-02 The language rule kept in `SKILL.md`, `procedure.md`, the two common headers and the verifier; removed from nine sites.
 - X-03, X-04 The checkpoint restatements and the retyped SQL became pointers.
 - X-05 Splitting `procedure.md` § Phases per phase: not applied, issue to open.

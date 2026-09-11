@@ -43,4 +43,4 @@ The eighteen executable guards (`scripts/`, `rules/`, fixtures, a JSON stack map
 | Load-bearing claims | 1 FALSE · 5 TRUE-WITH-CAVEAT · 1 VERSION-STALE · 1 COULD NOT VERIFY |
 | Backlog rows | see `06-backlog.md`: applied in wave 3, spec'd, or issued |
 | Sources fetched | listed in `sources.md`; could-not-verify list at its end |
-| Corpus before / after / budget | 28,768 / 33,622 at verifier round 1 (final in `verification.md`) / 33,083; decision 009 |
+| Corpus before / after / budget | 28,768 / 33,699 (verifier re-verification) / 33,083; 616 over, decision 009 |

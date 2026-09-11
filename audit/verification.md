@@ -125,3 +125,94 @@ Beyond a row's scope, done anyway (all three P3, two declared in decision 009, n
 | 20 | `audit/SUMMARY.md` § Numbers "Corpus before / after" still a placeholder | **P3** | fill with 33,622 |
 
 No residue invalidates a P1 repair: the permission check, the canary protocol, the ledger guards, the allocation table, the token/grant/lint/cache corrections and the object-level, rollback, supply-chain and validation coverage are all present, correctly worded, and correctly cited.
+
+---
+
+## Re-verification, round 1
+
+Tree committed as `64b4156` (baseline still `c32367a`). Scope: the fix diffs only, plus the four gates the coordinator named. Nothing repaired here.
+
+| # | residue | verdict | evidence |
+|---|---|---|---|
+| 1 | `rg -nE` unexecutable | **RESOLVED** | `modes/triage.md:14` — `3. rg -n "\.limit\(\|limit:\s*[0-9]{3,}" <src>`; re-run on the A6-03 fixture: exit **0**, 4 hits incl. `.limit(1000)` |
+| 2 | `rg -Lc` inverted | **RESOLVED** | `modes/triage.md:19` — `rg --files-without-match "if not exists" <migrations> \| wc -l`; re-run: returns `mig/a.sql`, the non-idempotent one, exit 0 |
+| — | extra, item 6 | **OK** | `modes/triage.md:17` — `rg -l "tested against" <tests> \| wc -l`; re-run on a 2-file fixture: `1`, exit 0 (was `-c`, per-file counts) |
+| 3 | phase-0 "all in one message" | **RESOLVED** | `briefs/phase-0-diagnosis.md:3` — "Dispatched in two waves (`modes/diagnose.md` § 1); the size band may drop D3/D5." Agrees with `modes/diagnose.md:32` and § 0b |
+| 4 | `sql/` in no Load cell | **RESOLVED** | `SKILL.md:21` (`diagnose`), `:23` (`run <N>`), `:25` (`maintain`) each name `sql/verify-permissions.sql` |
+| 5 | six undeclared placeholders | **RESOLVED** | `procedure.md:63` — "… `<components>` · `<src>` · `<actions>` · `<services>` · `<tests>` · `<migrations>` · `<routes>`, folders from the map · `<allocation>` …". Re-run of the closure grep: every remaining token is pre-existing and self-describing, or `<label>`/`<Suspense>`, which the rule excludes |
+| 6 | no observability guard row | **RESOLVED** | `modes/maintain.md:19` — `Request id end to end; must-log events \| 6 \| the grep from R6.7 \| R6.7` |
+| 7 | X-01 keep site misplaced | **RESOLVED** | The sentence is now inside the common repair header (`briefs/phase-1-gates.md:10`, final clause) and gone from R1.3; `grep -rn` over the corpus returns exactly 3 sites: `procedure.md:57`, `briefs/phase-1-gates.md:10`, `briefs/verifier.md:7` |
+| 8 | CHANGELOG C-16 false | **RESOLVED** | `CHANGELOG.md:24` — "C-16 Superseded by F-03: the canary baseline is now the working-tree file, so the new-file caveat is unnecessary; not applied." |
+| 9 | CHANGELOG X-01 false | **RESOLVED, new minor error** | `CHANGELOG.md:106` now says "removed from eight files" and names the common repair header — but also "kept in `procedure.md` § Placeholders"; the sentence is at `procedure.md:57`, inside § Artifacts in the project (§ Placeholders starts at `:61`). See N1 |
+| 10 | garbled `FormData` clause | **RESOLVED** | `areas/interface.md:64` — "…is **absent** from `FormData`, not empty, and a save that writes every submitted key clears it" |
+| 11 | example says `cmp` | **RESOLVED** | `examples/one-defect.md:22` — "canary red on `disabled`, restored, `git diff --stat` unchanged" |
+| 12 | canary mirrors incomplete | **RESOLVED** | `areas/quality.md:58` — "…and a 0-byte `.orig` for a non-empty file aborts the canary … after the last canary, re-run the unit gate."; `briefs/phase-5-tests.md:13` — same two clauses. All six steps now in all three sites, same order, same RED |
+| 13 | decision 009 numbers | **RESOLVED, one copy stale** | `009` title "by about 540 words"; body "Measured by the verifier after the patch set: **33,622** (+4,854, +16.9 %, 539 over)"; "the 'These are defaults…' sentence in eight of ten files". See N2 |
+| 14 | decision 009 per-mode table | **RESOLVED** | `009:19` — "Whole files named by the cell, `SKILL.md` excluded on both sides, before → after: `status` 834 → 5,722 …, `diagnose` 5,441 → 9,509 (17,496 with the six areas …), `run 2` 7,397 → 11,060, `run 4` 8,625 → 11,566, `maintain` 3,500 → 7,844." All five pairs match my measurements exactly, and the convention is now stated |
+| 15 | bare `[SC …]` keys | **RESOLVED** | `SKILL.md:110` — "… `[WCAG 2.2 SC …]`, short form `[SC …]`)". Keys unchanged, which is the cheaper half; the default-provenance rule now covers them |
+| 16 | `compatibility` omits ripgrep | **RESOLVED** | `SKILL.md:5` — "git, grep, ripgrep for `triage`, a Postgres client for the SQL checks, gitleaks, semgrep — or their equivalents from the stack map"; 147 chars, under the documented 500 |
+| 17 | `examples/` not in the `diagnose` cell | **RESOLVED** | `SKILL.md:21` names `examples/one-defect.md` |
+| 18 | prefix-only heading refs | **RESOLVED** | `procedure.md:20` — "(§ Artifacts in the project)"; `docs/decisions/008:20` — "`areas/quality.md` § The gate chain" |
+| 19 | GLOSSARY vocabulary trimmed | **RESOLVED** | `GLOSSARY.md:7` — "(layers, dependency rule, bounded context, single writer, deep module, one implementation per concept, effect map)" |
+| 20 | SUMMARY placeholder | **RESOLVED** | `audit/SUMMARY.md:46` — "28,768 / 33,622 at verifier round 1 (final in `verification.md`) / 33,083; decision 009". Final figure below |
+
+**20 of 20 RESOLVED.**
+
+### Re-measured
+
+| gate | result |
+|---|---|
+| Corpus words | **33,699** — matches the orchestrator's figure. Budget 33,083 → **616 over, +17.1 %**. The fix round added 77 words |
+| `audit/` isolation | `grep -rn 'audit/'` over the loadable set: no output, exit 1 — **PASS** |
+| CR bytes | `grep -rlI` on CR: no output, exit 1 — **PASS** |
+| Placeholder closure | the six tokens declared at `procedure.md:63`; no undeclared token left that is not pre-existing and self-describing — **PASS** |
+| Paths (re-run) | every cited `modes`/`briefs`/`areas`/`templates`/`examples`/`sql` path exists; only `areas/components.md` missing, the deliberate sibling pointer — **PASS** |
+| `§` headings (re-run) | all 19 file+section references resolve exactly — **PASS** |
+| Counts (re-run) | 7 mode rows = 7 `argument-hint` values; 6 conditions; status template 4 / 8 / 3 rows — **PASS** |
+| Citation keys | 47 distinct bracketed strings, of which 5 are the declaration forms at `SKILL.md:110`. No new citation key introduced by the fix round; no area file's key set changed |
+| Scope of the fix round | `git diff c32367a 64b4156 --stat` against my pre-fix record: only `briefs/phase-0-diagnosis.md` (31→33), `briefs/phase-1-gates.md` (12→14) and `modes/maintain.md` (28→29) changed line count; every other file changed in place. No file outside the coordinator's fix list moved; `git status --short` clean |
+
+### New breakage, within the fix diffs
+
+| # | item | sev | fix |
+|---|---|---|---|
+| N1 | `CHANGELOG.md:106` places the surviving "These are defaults…" sentence in "`procedure.md` § Placeholders"; it is at `:57`, inside § Artifacts in the project | **P3** | "§ Artifacts in the project" |
+| N2 | `docs/decisions/README.md:15` still reads "the +15 % budget is exceeded by 536 words" while `009`'s title and body now say ~540 / 539 | **P3** | make the register row match `009` |
+| N3 | The new `maintain` guard row is mapped to Condition **6** (decision records, documentation measured); its subject — request id, must-log events — lives in `areas/data-security.md` § Integrations, and the sibling integration row (live channel table) is mapped to **3** | **P3** | Condition 3, or 3, 6 |
+
+Also noted, not breakage: `CHANGELOG.md:5` and `docs/decisions/009` carry 33,622, each explicitly deferring the final figure to this file — it is **33,699**. Three guard-table Command cells were trimmed in the same edit ("named in the stack map" → "from the stack map"; ", by name" dropped; "(policies, grants, execution)" dropped): cosmetic, nothing lost that `sql/verify-permissions.sql` does not already cover.
+
+### Verdict after round 1: **RESIDUAL — P3 only**
+
+No P1 and no P2 remains. Every executable command in the corpus now runs and computes what its sentence claims; every load list, cross-reference, placeholder and citation closes; every count asserted in prose is true; the canary protocol, the ledger guards and the permission file are consistent across all their sites. Remaining: **N1, N2, N3**, all P3, none of them an instruction a cold agent executes. The declared, ruled residue stands: the corpus is **616 words over the +15 % budget**, kept under decision 009, whose figures should be refreshed from 33,622 to **33,699** when the three P3s are touched.
+
+---
+
+## Re-verification, round 2
+
+Working tree on top of `64b4156`. Scope: the three P3s from round 1 and the refreshed corpus figures. `git diff 64b4156 --stat` outside `audit/`: `CHANGELOG.md` 4, `docs/decisions/009-growth-budget-exceeded.md` 4, `docs/decisions/README.md` 2, `modes/maintain.md` 2 — 6 insertions, 6 deletions, nothing else touched.
+
+| # | residue | verdict | evidence |
+|---|---|---|---|
+| N1 | CHANGELOG X-01 named the wrong section | **RESOLVED** | `CHANGELOG.md:106` — "X-01 'These are defaults…' kept in `procedure.md` § Artifacts in the project, `briefs/verifier.md` and the common repair header of `briefs/phase-1-gates.md`; removed from eight files." The heading at `procedure.md:34` is "## Artifacts in the project" and the sentence is at `:57`, inside it: exact match |
+| N2 | "536 words" stale in the register | **RESOLVED** | `docs/decisions/README.md:15` — "the +15 % budget is exceeded by about 600 words; kept, with the cuts named"; `009` title — "The corpus exceeds the +15 % budget by about 600 words". Both agree with the measured 616 |
+| N3 | observability guard mapped to Condition 6 | **RESOLVED** | `modes/maintain.md:18` — "Request id end to end; must-log events \| **3** \| the grep from R6.7 \| R6.7". Now consistent with the two sibling rows that carry the same subject: `:17` live channel table = 3, `:20` permissions on the database = 3 |
+
+**3 of 3 RESOLVED. Cumulative: 23 of 23 residues closed across two rounds.**
+
+### Refreshed figures, checked against my own measurement
+
+| site | text | correct? |
+|---|---|---|
+| corpus, re-measured | `find … \| xargs -0 wc -w \| tail -1` → **33,699** | unchanged from round 1: the only loadable file touched is `modes/maintain.md`, where "6" became "3" (1,054 words, same as before) |
+| `docs/decisions/009:7` | "after its residues were applied: **33,699** (+4,931, +17.1 %, 616 over); 33,539 without `sql/verify-permissions.sql`" | **yes** — 33,699 − 28,768 = 4,931 (+17.14 %); 33,699 − 33,083 = 616; 33,699 − 160 = 33,539. It also keeps the round-1 figure (33,622, 539 over) as the intermediate, which is accurate |
+| `CHANGELOG.md:5` | "Corpus: 28,768 → 33,699 words after the verifier's residues were applied (decision 009; `audit/verification.md` § Re-verification)" | **yes** |
+| `audit/SUMMARY.md:46` | "28,768 / 33,699 (verifier re-verification) / 33,083; 616 over, decision 009" | **yes** |
+
+### New breakage within those lines
+
+**None.** No CR byte in any of the four changed files; no `audit/` reference in `modes/maintain.md`; the guard table still has 10 rows and 4 columns; no path, `§` reference, placeholder, citation key or asserted count is affected by a one-character condition change. The only inexactness left is `CHANGELOG.md:5` citing "`audit/verification.md` § Re-verification" against two headings named "Re-verification, round 1" and "Re-verification, round 2" — a prefix that resolves to both, in a file no mode loads; not a defect.
+
+### Final verdict: **CLOSED**
+
+Every residue raised in this verification is closed. The corpus stands at **33,699 words, 616 over the +15 % budget** — a declared, ruled overage under decision 005 and decision 009, not an open defect. Every printed command in the skill runs and computes what its sentence claims; every load list, cross-reference, `§` heading, placeholder and citation key closes; every count asserted in prose is true; the canary protocol, the ledger guards, the allocation table and the permission file say the same thing at every site; and all 85 `W3` backlog rows are applied, with `U-12` and `X-05` correctly left as spec and issue.

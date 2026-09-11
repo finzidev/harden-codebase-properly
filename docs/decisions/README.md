@@ -12,7 +12,7 @@ Why the skill is the way it is, one file per reversible choice, in the shape of 
 | 006 | craft labeled by a default rule plus citation keys, not per line | in force |
 | 007 | coverage gaps attach to existing areas; no new phase or area | in force |
 | 008 | Next.js 16 API drift: version-conditional wording, not a rewrite to 16 | in force |
-| 009 | the +15 % budget is exceeded by 536 words; kept, with the cuts named | in force |
+| 009 | the +15 % budget is exceeded by about 600 words; kept, with the cuts named | in force |
 
 ## Open questions
 
