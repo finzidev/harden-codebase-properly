@@ -2,7 +2,7 @@
 
 Principle: **one path to do a thing — never two screens that answer the same question differently, never two gestures for the same command.**
 
-This area is about what the interface *does*: how lists are viewed, filtered and sorted, how entities are opened and edited, how commands respond, which colors mean which verb, where the irreversible action lives. How the interface is *built* (one table shell fed by a field registry, shared components as deep modules, no per-caller parameter, the primitives catalogue) is the subject of the sibling skill `design-software-properly` (its `areas/components.md`, Phase 3). Repairs here land on the shell when it exists, on the existing list components otherwise, and are repeated once the shell arrives; they never add a per-caller parameter to a shared component to make a behaviour fit.
+This area is about what the interface *does*: how lists are viewed, filtered and sorted, how entities are opened and edited, how commands respond, which colors mean which verb, where the irreversible action lives. How the interface is *built* (one table shell fed by a field registry, shared components as deep modules, no per-caller parameter, the primitives catalogue) is the subject of the sibling skill `design-software-properly` (its `areas/components.md`, Phase 3: a file of that skill, not of this one). Repairs here land on the shell when it exists, on the existing list components otherwise, and are repeated once the shell arrives; they never add a per-caller parameter to a shared component to make a behaviour fit.
 
 Communication with the person using the product (readable errors, distinct states, labels, hints, tooltips, outcomes, glossary) lives in `user-communication.md` and is part of the same phase.
 
